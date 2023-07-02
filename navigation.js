@@ -14,14 +14,15 @@ import Rutinas from './screens/Rutinas'
 import ValvulaInfo from './screens/ValvulaInfo'
 import UsuarioInfo from './screens/UsuarioInfo'
 import Notificaciones from './screens/Notificaciones'
+import ButtonsTabs from './buttontab';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 
-const navigation = () => {
+const Navigation = () => {
   return (
-    <NavigationContainer >
+    <NavigationContainer>
        <Stack.Navigator initialRouteName='InicioSesion'>
         <Stack.Screen options={{headerShown:false}} name="InicioSesion" component={InicioSesion} />
         <Stack.Screen options={{headerShown:false}} name="MenuConfig" component={MenuConfig} />
@@ -29,28 +30,11 @@ const navigation = () => {
         <Stack.Screen options={{headerShown:false}} name="RegistroUsuario" component={RegistroUsuario} />
         <Stack.Screen options={{headerShown:false}} name="RegistroValvula" component={RegistroValvula} />
         <Stack.Screen options={{headerShown:false}} name="Rutinas" component={Rutinas} />
-        <Stack.Screen options={{headerShown:false}} name="ValvulaInfo" component={ValvulaInfo} />
-        <Stack.Screen options={{headerShown:false}} name='ButtonsTab' component={ButtonsTab}/>
+        <Stack.Screen options={{headerShown:true,title:"",headerShadowVisible:false}} name="ValvulaInfo" component={ValvulaInfo} />
+        <Stack.Screen options={{headerShown:false}} name='Buttons' component={ButtonsTabs}/>
        </Stack.Navigator>
     </NavigationContainer>
-
-    
-
-
   )
-  function ButtonsTab() {
-    return (
-      <Tab.Navigator initialRouteName='PantallaPrincipal' screenOptions={{tabBarHideOnKeyboard:true,tabBarShowLabel:false,tabBarStyle:{backgroundColor:"#E73D07"}, tabBarIconStyle:{opacity:0.6}}}>
-        <Tab.Screen options={{headerShown:false,tabBarIcon:({color,size}) => (<AntDesign name='setting' color={"white"} size={30}/> ),}} name="Config" component={MenuConfig} />
-        <Tab.Screen options={{headerShown:false,tabBarIcon:({color,size}) => (<Ionicons name='person-outline' color={"white"} size={30}/> ),}} name="UsuarioInfo" component={UsuarioInfo} />
-        <Tab.Screen options={{headerShown:false,tabBarIcon:({color,size}) => (<Octicons name='flame' color={"white"} size={30}/> ),}} name="PantallaPrincipal" component={PantallaPrincipal} />
-        <Tab.Screen options={{headerShown:false,tabBarIcon:({color,size}) => (<Feather name='bell' color={"white"} size={30}/> ),}} name="Notificaciones" component={Notificaciones} />
-        <Tab.Screen options={{headerShown:false, tabBarIcon:({color,size}) => (<Feather name='menu' color={"white"} size={30}/> ),}} name="Menu2" component={MenuConfig} />
-
-        
-      </Tab.Navigator>
-    )
-  }
 
 }
-export default navigation
+export default Navigation

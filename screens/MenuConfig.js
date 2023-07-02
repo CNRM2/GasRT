@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native'
 const MenuConfig = () => {
     return (
         <SafeAreaView>
-            <Text>ADASD</Text>
+            
         </SafeAreaView>
     )
 }

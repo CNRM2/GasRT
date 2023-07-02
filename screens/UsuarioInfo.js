@@ -5,8 +5,8 @@ import { SafeAreaView } from 'react-native'
 
 const UsuarioInfo = () => {
     return (
-        <SafeAreaView>
-            <Text>ADASD</Text>
+        <SafeAreaView style={{justifyContent:"center",alignItems:"center",flex:1}}>
+            <Text></Text>
         </SafeAreaView>
     )
 }

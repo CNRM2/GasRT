@@ -21,7 +21,7 @@ const InicioSesion = () => {
                     <TextInput placeholder='CONTRASEÑA' secureTextEntry={true} style={{ marginLeft: 20 }} />
                 </SafeAreaView>
             </View>
-            <TouchableOpacity style={[Style.ButtonCreate]} onPress={() => navigation.navigate('ButtonsTab')}>
+            <TouchableOpacity style={[Style.ButtonCreate]} onPress={() => navigation.navigate('Buttons')}>
                 <Text style={{ fontSize: 16, fontWeight: "bold", color: "white" }}>INGRESAR</Text>
             </TouchableOpacity>
             <Text style={{marginTop:20}}>¿No tienes una Cuenta?</Text>
