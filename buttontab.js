@@ -31,7 +31,7 @@ function Buttons(){
             <Ionicons name='person-outline' color={"white"} size={30} />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('PantallaPrincipal')}>
-            <Octicons name='flame' color={"white"} size={30} />
+            <Octicons name='flame' color={"white"} size={30}/>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('Notificaciones')}>
             <Feather name='bell' color={"white"} size={30} />
@@ -45,7 +45,7 @@ function Buttons(){
 
 function ButtonsTab() {
     return (
-        <Tab.Navigator tabBar={() => <Buttons/>} initialRouteName='PantallaPrincipal' screenOptions={{ tabBarHideOnKeyboard: true, tabBarShowLabel: false, tabBarStyle: { backgroundColor: "#E73D07" }, tabBarIconStyle: { opacity: 0.6 } }}>
+        <Tab.Navigator initialRouteName='PantallaPrincipal' screenOptions={{ tabBarHideOnKeyboard: true, tabBarShowLabel: false, tabBarStyle: { backgroundColor: "#E73D07" }, tabBarIconStyle: { opacity: 0.6 } }}>
             <Tab.Screen options={{ headerShown: false, tabBarIcon: ({ color, size }) => (<AntDesign name='setting' color={"white"} size={30} />), }} name="Config" component={MenuConfig} />
             <Tab.Screen options={{ headerShown: false, tabBarIcon: ({ color, size }) => (<Ionicons name='person-outline' color={"white"} size={30} />), }} name="UsuarioInfo" component={UsuarioInfo} />
             <Tab.Screen options={{ headerShown: false, tabBarIcon: ({ color, size }) => (<Octicons name='flame' color={"white"} size={30} />), }} name="PantallaPrincipal" component={PantallaPrincipal} />

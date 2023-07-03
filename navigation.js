@@ -29,7 +29,7 @@ const Navigation = () => {
         <Stack.Screen options={{headerShown:false}} name="Emergencia" component={Emergencia} />
         <Stack.Screen options={{headerShown:false}} name="RegistroUsuario" component={RegistroUsuario} />
         <Stack.Screen options={{headerShown:false}} name="RegistroValvula" component={RegistroValvula} />
-        <Stack.Screen options={{headerShown:false}} name="Rutinas" component={Rutinas} />
+        <Stack.Screen options={{headerShown:true,title:"",headerShadowVisible:false}} name="Rutinas" component={Rutinas} />
         <Stack.Screen options={{headerShown:true,title:"",headerShadowVisible:false}} name="ValvulaInfo" component={ValvulaInfo} />
         <Stack.Screen options={{headerShown:false}} name='Buttons' component={ButtonsTabs}/>
        </Stack.Navigator>
