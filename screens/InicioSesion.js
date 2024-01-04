@@ -4,9 +4,30 @@ import { Component } from 'react'
 import { TextInput } from 'react-native'
 import { TouchableOpacity } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
+import { useState } from 'react'
 
 const InicioSesion = () => {
     const navigation = useNavigation();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleEmailChange = (text) => {
+        // Eliminar espacios en blanco al principio y al final del texto
+        const trimmedText = text.trim();
+        setEmail(trimmedText);
+      };
+    
+      const handlePasswordChange = (text) => {
+        // Eliminar espacios en blanco al principio y al final del texto
+        const trimmedText = text.trim();
+        setPassword(trimmedText);
+      };
+
+    const handleKeyPress = (e) => {
+        if (e.nativeEvent.key === ' ') {
+            e.preventDefault();
+        }
+    };
     return (
         <SafeAreaView style={[Style.container]}>
             <SafeAreaView style={{ marginTop: 100 }}>
@@ -15,20 +36,24 @@ const InicioSesion = () => {
 
             <View style={{ justifyContent: "center", alignContent: "center", marginTop: 10 }}>
                 <SafeAreaView style={[Style.TextInputs]}>
-                    <TextInput placeholder='CORREO O USUARIO' style={{ marginLeft: 20 }} />
+                    <TextInput value={email}
+                        onChangeText={handleEmailChange}
+                        onKeyPress={handleKeyPress} placeholder='CORREO O USUARIO' style={{ marginLeft: 20 }} />
                 </SafeAreaView>
                 <SafeAreaView style={[Style.TextInputs, { marginTop: 20 }]}>
-                    <TextInput placeholder='CONTRASEÑA' secureTextEntry={true} style={{ marginLeft: 20 }} />
+                    <TextInput value={password}
+                        onChangeText={handlePasswordChange}
+                        onKeyPress={handleKeyPress} placeholder='CONTRASEÑA' secureTextEntry={true} style={{ marginLeft: 20 }} />
                 </SafeAreaView>
             </View>
-            <TouchableOpacity style={[Style.ButtonCreate]} onPress={() => navigation.navigate('Buttons')}>
+            <TouchableOpacity style={[Style.ButtonCreate]} onPress={() => navigation.navigate('ButtonsTab')}>
                 <Text style={{ fontSize: 16, fontWeight: "bold", color: "white" }}>INGRESAR</Text>
             </TouchableOpacity>
-            <Text style={{marginTop:20}}>¿No tienes una Cuenta?</Text>
+            <Text style={{ marginTop: 20 }}>¿No tienes una Cuenta?</Text>
             <TouchableOpacity style={[Style.ButtonCreate]} onPress={() => navigation.navigate('RegistroUsuario')}>
                 <Text style={{ fontSize: 16, fontWeight: "bold", color: "white" }}>CREAR CUENTA</Text>
             </TouchableOpacity>
-            
+
 
         </SafeAreaView>
     )

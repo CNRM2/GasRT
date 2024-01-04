@@ -5,6 +5,7 @@ import { SafeAreaView, ScrollView } from 'react-native'
 import { StyleSheet } from 'react-native'
 import { Switch } from 'react-native'
 import { useState } from 'react'
+import { Buttons} from '../buttontab'
 
 const Rutinas = () => {
   const [switchStates, setSwitchStates] = useState([false, false]);
@@ -31,7 +32,7 @@ const Rutinas = () => {
           <Image source={require("../Images/more.png")} style={{ marginRight: 20 }} />
         </TouchableOpacity>
       </SafeAreaView>
-      <ScrollView style={{maxHeight:640}}>
+      <ScrollView style={{ maxHeight: 640 }}>
         {alarmas.map((alarma, index) => (
           <SafeAreaView key={index} style={[style.alarmas, { opacity: switchStates[index] ? 1 : 0.9, marginTop: 20 }]}>
             <SafeAreaView style={{ flexDirection: "column", flex: 1 }}>
@@ -52,7 +53,7 @@ const Rutinas = () => {
           </SafeAreaView>
         ))}
       </ScrollView>
-
+      <Buttons />
     </SafeAreaView>
   );
 };

@@ -2,6 +2,7 @@ import { View, Text, SafeAreaView, TouchableOpacity, Image, Switch } from 'react
 import { Component } from 'react-native'
 import { useState } from 'react';
 import CircularProgress from 'react-native-circular-progress-indicator';
+import { Buttons} from '../buttontab';
 
 const ValvulaInfo = () => {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -56,6 +57,7 @@ const ValvulaInfo = () => {
           onValueChange={toggleSwitch}
           value={isEnabled} />
       </SafeAreaView>
+      <Buttons/>
     </SafeAreaView>
   );
 }

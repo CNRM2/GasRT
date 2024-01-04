@@ -24,7 +24,7 @@ const MenuConfig = () => {
             </TouchableOpacity>
             </SafeAreaView>
             <SafeAreaView style={[style.ButtonCreate]} >
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("RegistroValvula")}>
                 <Text style={{ fontSize: 16, fontWeight: "bold", color: "white",marginLeft:20}}>CONFIGURACIÓN DE VALVULAS</Text>
             </TouchableOpacity>
             </SafeAreaView>

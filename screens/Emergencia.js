@@ -3,6 +3,7 @@ import React from 'react'
 import { Component } from 'react'
 import { SafeAreaView } from 'react-native'
 import { Fontisto, MaterialCommunityIcons, MaterialIcons, Ionicons, Entypo, AntDesign, Feather, Octicons } from '@expo/vector-icons';
+import { Buttons } from '../buttontab'
 
 const Emergencia = () => {
   return (
@@ -30,7 +31,7 @@ const Emergencia = () => {
       <TouchableOpacity style={{ marginTop: 50, backgroundColor: "#FF0000", padding: 30, borderRadius: 100 }}>
         <Text style={{ color: "white", fontSize: 15, fontWeight: "700" }}>LLAMADA DE EMERGENCIA</Text>
       </TouchableOpacity>
-
+      <Buttons/>
     </SafeAreaView>
   )
 }
