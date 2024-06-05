@@ -2,7 +2,7 @@ import { View, Text, SafeAreaView, TouchableOpacity, Image, Switch } from 'react
 import { Component } from 'react-native'
 import { useState } from 'react';
 import CircularProgress from 'react-native-circular-progress-indicator';
-import { Buttons} from '../buttontab';
+import { ButtonsTab} from '../buttontab';
 
 const ValvulaInfo = () => {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -25,10 +25,10 @@ const ValvulaInfo = () => {
             Gas Restante:
           </Text>
           <CircularProgress radius={90} value={progressColor.value } valueSuffix='%' circleBackgroundColor='white' activeStrokeColor={progressColor.value < 25 ? "red" : "green"} />
-          <TouchableOpacity style={{ flexDirection: "row", justifyContent: "center", backgroundColor: "#E73D07", alignItems: "center", borderRadius: 15, padding: 10,marginTop:10}}>
+          <SafeAreaView style={{ flexDirection: "row", justifyContent: "center", backgroundColor: "#E73D07", alignItems: "center", borderRadius: 15, padding: 10,marginTop:10}}>
             <Image style={{ marginRight: 10 }} source={require("../Images/Ellipse.png")} />
             <Text style={{ fontSize: 16 }}>VALVULA 1</Text>
-          </TouchableOpacity>
+          </SafeAreaView>
         </SafeAreaView>
       </SafeAreaView>
       <SafeAreaView style={{}}>
@@ -57,7 +57,7 @@ const ValvulaInfo = () => {
           onValueChange={toggleSwitch}
           value={isEnabled} />
       </SafeAreaView>
-      <Buttons/>
+      <ButtonsTab/>
     </SafeAreaView>
   );
 }

@@ -1,128 +1,287 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
-import { SafeAreaView, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView, View, ScrollView, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import CircularProgress from 'react-native-circular-progress-indicator';
+import { useNavigation } from '@react-navigation/native';
+import { db } from '../components/config';
+import { getAuth } from "firebase/auth";
+import { ref, onValue, set, push } from 'firebase/database';
 
 const PantallaPrincipal = () => {
-  const [humidityValue, setHumidityValue] = useState(0); // Estado del sensor de humedad
-  const [progressColor, setProgressColor] = useState(0); // Estado del círculo de progreso
-  const [message, setMessage] = useState(''); // Estado para el mensaje del LED
-  const navigation = useNavigation();
-  const [ledStatus, setLedStatus] = useState(false);
-  const serverURL = 'https://gasrt.000webhostapp.com/index.php'; // URL de tu servidor PHP
+  const [device1Data, setDevice1Data] = useState({
+    Id_device: "",
+    command: "on",
+    led_status: false,
+    nombre: "",
+    sensor_data: 0,
+    state: "activo"
+  });
 
-  const fetchHumidityValue = async () => {
-    try {
-      const response = await fetch(serverURL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sensor_data: 'humidity' }),
-      });
-      console.log('Response status:', response.status);
-      if (response.ok) {
-        const responseBody = await response.json();
-        console.log('Response body:', responseBody);
-  
-        // Actualiza el estado de la humedad y el color del progreso
-        const humidity = parseFloat(responseBody.humidity);
-        setHumidityValue(humidity);
-        setProgressColor(humidity);
-  
-        const ledStatus = responseBody.led_status === "1";
-        setLedStatus(ledStatus);
-        const message = ledStatus ? 'Valvula Abierta' : 'Valvula Cerrada';
-        setMessage(message);
-  
-        // Comprueba si la humedad supera el nivel
-        if (humidity > 50) {
-          console.log('Superado el nivel de gas. Enviando comando "turn_off"');
-          await fetch(serverURL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'control_command=turn_off',
-          });
-          console.log('Comando "turn_off" enviado');
-        }
-  
+  const [device2Data, setDevice2Data] = useState({
+    Id_device: "",
+    command: "on",
+    led_status: false,
+    nombre: "",
+    sensor_data: 0,
+    state: "activo"
+  });
+
+  const navigation = useNavigation();
+  const auth = getAuth();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (user) {
+        setUser(user);
+        cargarDatos(user.uid);
       } else {
-        console.error('Error en la solicitud HTTP al obtener el valor del sensor de humedad.');
+        setUser(null);
+        setDevice1Data({
+          Id_device: "",
+          command: "on",
+          led_status: false,
+          nombre: "",
+          sensor_data: 0,
+          state: "activo"
+        });
+        setDevice2Data({
+          Id_device: "",
+          command: "on",
+          led_status: false,
+          nombre: "",
+          sensor_data: 0,
+          state: "activo"
+        });
       }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const cargarDatos = (uid) => {
+    const deviceRef = ref(db, `users/${uid}/device`);
+    onValue(deviceRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        Object.keys(data).forEach((deviceId) => {
+          const deviceData = data[deviceId];
+          const id = deviceData.Id_device;
+          const command = deviceData.command || "on";
+          const led_status = deviceData.led_status || false;
+          const nombre = deviceData.nombre || "";
+          const sensor_data = deviceData.sensor_data || 0;
+          const state = deviceData.state || "activo";
+
+          if (deviceId === "-Ny1JGi_Cl-xzrP_fTMG") {
+            setDevice1Data({
+              Id_device: id,
+              command: command,
+              led_status: led_status,
+              nombre: nombre,
+              sensor_data: sensor_data < 0 ? 0 : sensor_data, // Verificar valor negativo
+              state: state
+            });
+          } 
+
+          if (deviceId === "-Ny1JX-I4AsZQU0nkvGc") {
+            setDevice2Data({
+              Id_device: id,
+              command: command,
+              led_status: led_status,
+              nombre: nombre,
+              sensor_data: sensor_data < 0 ? 0 : sensor_data, // Verificar valor negativo
+              state: state
+            });
+            console.log(deviceRef);
+          }
+        });
+      } else {
+        setDevice1Data({
+          Id_device: "",
+          command: "on",
+          led_status: false,
+          nombre: "",
+          sensor_data: 0,
+          state: "Activo"
+        });
+        setDevice2Data({
+          Id_device: "",
+          command: "on",
+          led_status: false,
+          nombre: "",
+          sensor_data: 0,
+          state: "Activo"
+        });
+      }
+    });
+  };
+
+  const toggleLed = async () => {
+    try {
+      const newLedStatus = !device1Data.led_status;
+      const command = newLedStatus ? 'on' : 'off';
+      await set(ref(db, `users/${user.uid}/device/command`), { command });
+
+      setDevice1Data({
+        ...device1Data,
+        led_status: newLedStatus
+      });
     } catch (error) {
       console.error('Error:', error);
     }
-  };  
-  const toggleLed = async () => {
+  };
+
+  const agregarDispositivo = async () => {
     try {
-        // Envía un comando al ESP32 para encender o apagar la bomba (LED)
-        const command = ledStatus ? 'turn_off' : 'turn_on'; // Comando apropiado
-        console.log('Solicitud POST:', `control_command=${command}`); // Imprime la solicitud POST
-        const response = await fetch(serverURL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `control_command=${command}`, // Envía el comando al servidor
-        });
-        console.log('Response status:', response.status, command);
-
-        if (response.ok) {
-            // Actualiza el estado del LED
-            setLedStatus(!ledStatus);
-        } else {
-            console.error('Error en la solicitud HTTP para controlar el LED.');
-            // Puedes mostrar un mensaje de error al usuario aquí
-        }
+      const userDeviceRef = ref(db, `users/${user.uid}/device`);
+      const newDeviceRef = push(userDeviceRef);
+      const newDeviceId = newDeviceRef.key;
+  
+      await set(newDeviceRef, {
+        Id_device: newDeviceId,
+        command: "on",
+        led_status: false,
+        nombre: "Nuevo Dispositivo",
+        sensor_data: 0,
+        state: "activo"
+      });
+  
+      console.log("Nuevo dispositivo agregado con ID:", newDeviceId);
     } catch (error) {
-        console.error('Error:', error);
-        // Puedes mostrar un mensaje de error al usuario aquí
+      console.error('Error al agregar dispositivo:', error);
     }
-};
-
+  };
+  
+  
   useEffect(() => {
-    // Obtiene el valor del sensor inicialmente
-    fetchHumidityValue();
+    const interval = setInterval(() => {
+      if (user) {
+        cargarDatos(user.uid);
+      }
+    }, 500);
 
-    // Establece un intervalo para actualizar el valor del sensor cada 2000 milisegundos (2 segundos)
-    const interval = setInterval(fetchHumidityValue, 500);
-
-    // Limpia el intervalo al desmontar el componente
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
+    return () => clearInterval(interval);
+  }, [user]);
 
   return (
-    <SafeAreaView style={{ alignItems: "center", flex: 1, backgroundColor: "#FFFFFF", position:"relative" }}>
-      <Text style={{marginTop:100,fontSize:30,fontWeight:"700"}}>GasRT</Text>
-      <SafeAreaView style={{ flexDirection: "row",marginTop:80, justifyContent: "center", alignItems: "center" }}>
-      <SafeAreaView style={{ paddingVertical: 30, paddingHorizontal: 40, backgroundColor: "#EAEAEA99", borderRadius: 20, flexDirection: "column", alignItems: "center", justifyContent: "center", marginHorizontal: 55 }}>
-            <Text style={{ marginBottom: 10, fontSize: 20, fontWeight: "700" }}>
-              Nivel de Gas:
-            </Text>
-            <CircularProgress value={progressColor} radius={90} valueSuffix='%' circleBackgroundColor='transparent' activeStrokeColor={progressColor > 1000 ? "red" : "green"} />
-            <TouchableOpacity onPress={() => navigation.navigate('ValvulaInfo')} style={{ flexDirection: "row", justifyContent: "center", backgroundColor: "#E73D07", alignItems: "center", borderRadius: 15, paddingVertical: 15, paddingHorizontal: 20, marginTop: 20 }}>
-              <Image style={{ marginRight: 10 }} source={require("../Images/Ellipse.png")} />
-              <Text style={{ fontSize: 16,fontWeight:"500" }}>Valvula 1</Text>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>GasRT</Text>
+      <View style={styles.scrollViewContainer}>
+        <ScrollView horizontal={true} contentContainerStyle={styles.scrollViewContent}>
+          <View style={styles.cardContainer}>
+            <Text style={styles.cardTitle}>Nivel de Gas:</Text>
+            <CircularProgress value={device1Data.sensor_data} radius={90} valueSuffix='%' circleBackgroundColor='transparent' activeStrokeColor={device1Data.sensor_data > 1000 ? "red" : "green"} />
+            <TouchableOpacity onPress={() => navigation.navigate('ValvulaInfo')} style={styles.button}>
+              <Image style={styles.buttonImage} source={require("../Images/Ellipse.png")} />
+              <Text style={styles.buttonText}>{device1Data.nombre}</Text>
             </TouchableOpacity>
-            <Text style={{ color: "black",fontWeight:"600" }}>Estatus:{message}</Text>
-          </SafeAreaView>
-          {/* Agrega más secciones similares si es necesario */}
-      </SafeAreaView>
-      <SafeAreaView style={{ flexDirection: "row", marginTop: 20 }}>
-        <TouchableOpacity onPress={() => navigation.navigate('Rutinas')} style={{ backgroundColor: "#E73D07", padding: 20, borderRadius: 10, marginRight: 15 }}>
+            <Text style={styles.statusText}>Estatus: {device1Data.state}</Text>
+          </View>
+          <View style={styles.cardContainer}>
+            <Text style={styles.cardTitle}>Gas Restante:</Text>
+            <CircularProgress value={device2Data.sensor_data} radius={90} valueSuffix='%' circleBackgroundColor='transparent' activeStrokeColor={device2Data.sensor_data > 1000 ? "red" : "green"} />
+            <TouchableOpacity onPress={() => navigation.navigate('ValvulaInfo')} style={[styles.button, styles.button2]}>
+              <Image style={styles.buttonImage} source={require("../Images/Ellipse.png")} />
+              <Text style={styles.buttonText}>{device2Data.nombre}</Text>
+            </TouchableOpacity>
+            <Text style={styles.statusText}>Estatus: {device2Data.state}</Text>
+          </View>
+        </ScrollView>
+      </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity onPress={() => navigation.navigate('Rutinas')} style={styles.iconButton}>
           <Image source={require("../Images/despertador.png")} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={toggleLed} style={{ backgroundColor: "#E73D07", padding: 25, borderRadius: 10 }}>
-          <Text style={{textAlign:"center", color:"white",fontSize:16,fontWeight:"700"}}>Abrir Valvula</Text>
+        <TouchableOpacity onPress={toggleLed} style={styles.actionButton}>
+          <Text style={styles.actionButtonText}>{device1Data.led_status ? "Cerrar" : "Abrir"} Válvula</Text>
         </TouchableOpacity>
-      </SafeAreaView>
+      </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    position: "relative"
+  },
+  title: {
+    marginTop: 50,
+    fontSize: 30,
+    fontWeight: "700",
+    textAlign: "center"
+  },
+  scrollViewContainer: {
+    flex: 0.7,
+    marginHorizontal: 70,
+  },
+  scrollViewContent: {
+    alignItems: "center",
+    marginTop: 10
+  },
+  cardContainer: {
+    paddingVertical: 30,
+    paddingHorizontal: 40,
+    backgroundColor: "#EAEAEA99",
+    borderRadius: 20,
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 10
+  },
+  cardTitle: {
+    marginBottom: 10,
+    fontSize: 20,
+    fontWeight: "700"
+  },
+  button: {
+    flexDirection: "row",
+    justifyContent: "center",
+    backgroundColor: "#E73D07",
+    alignItems: "center",
+    borderRadius: 50,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    marginTop: 25
+  },
+  button2: {
+    marginTop: 25
+  },
+  buttonImage: {
+    marginRight: 10
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "500"
+  },
+  statusText: {
+    color: "black",
+    fontWeight: "600"
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 20
+  },
+  iconButton: {
+    backgroundColor: "#E73D07",
+    padding: 20,
+    borderRadius: 50,
+    marginRight: 15
+  },
+  actionButton: {
+    backgroundColor: "#E73D07",
+    padding: 20,
+    borderRadius: 50
+  },
+  actionButtonText: {
+    textAlign: "center",
+    color: "white",
+    fontSize: 16,
+    fontWeight: "700"
+  }
+});
 
 export default PantallaPrincipal;

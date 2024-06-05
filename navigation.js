@@ -14,6 +14,7 @@ import Rutinas from './screens/Rutinas'
 import ValvulaInfo from './screens/ValvulaInfo'
 import UsuarioInfo from './screens/UsuarioInfo'
 import Notificaciones from './screens/Notificaciones'
+import DispositivoInfo from './screens/DispositivoInfo';
 import {Buttons,ButtonsTab} from './buttontab';
 
 const Stack = createNativeStackNavigator();
@@ -31,8 +32,9 @@ const Navigation = () => {
         <Stack.Screen options={{ headerShown: false }} name="Emergencia" component={Emergencia} />
         <Stack.Screen options={{ headerShown: false }} name="RegistroUsuario" component={RegistroUsuario} />
         <Stack.Screen options={{ headerShown: false }} name="RegistroValvula" component={RegistroValvula} />
+        <Stack.Screen options={{ headerShown: false, title: "", headerShadowVisible: false }} name="DispositivosInfo" component={DispositivoInfo} />
         <Stack.Screen options={{ headerShown: true, title: "", headerShadowVisible: false }} name="Rutinas" component={Rutinas} />
-        <Stack.Screen options={{ headerShown: true, title: "", headerShadowVisible: false }} name="ValvulaInfo" component={ValvulaInfo} />
+        <Stack.Screen options={{ headerShown: false, title: "", headerShadowVisible: false }} name="ValvulaInfo" component={ValvulaInfo} />
       </Stack.Navigator>
     </NavigationContainer>
   )

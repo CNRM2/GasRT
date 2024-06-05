@@ -1,11 +1,19 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native'
+import { View, Text, Image, TouchableOpacity, Linking } from 'react-native'
 import React from 'react'
 import { Component } from 'react'
 import { SafeAreaView } from 'react-native'
 import { Fontisto, MaterialCommunityIcons, MaterialIcons, Ionicons, Entypo, AntDesign, Feather, Octicons } from '@expo/vector-icons';
 import { Buttons } from '../buttontab'
 
+
+
 const Emergencia = () => {
+
+  const handleEmergencyCall = () => {
+    // Abre la aplicación de llamadas y marca el número de emergencia
+    Linking.openURL('tel:6471242060');
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Text style={{ color: "#FF0000", fontSize: 40, fontWeight: "700", marginBottom: 30 }}>
@@ -28,7 +36,7 @@ const Emergencia = () => {
       <TouchableOpacity style={{ marginTop: 50, backgroundColor: "#FF0000", padding: 30, borderRadius: 100 }}>
         <Image source={require("../Images/Off.png")} />
       </TouchableOpacity>
-      <TouchableOpacity style={{ marginTop: 50, backgroundColor: "#FF0000", padding: 30, borderRadius: 100 }}>
+      <TouchableOpacity onPress={handleEmergencyCall} style={{ marginTop: 50, backgroundColor: "#FF0000", padding: 30, borderRadius: 100 }}>
         <Text style={{ color: "white", fontSize: 15, fontWeight: "700" }}>LLAMADA DE EMERGENCIA</Text>
       </TouchableOpacity>
       <Buttons/>

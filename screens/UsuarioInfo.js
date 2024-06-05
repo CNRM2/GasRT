@@ -1,65 +1,138 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native'
-import React, { useState, useEffect } from 'react'; // Importa useState y useEffect
-import { SafeAreaView } from 'react-native'
-import { Fontisto, MaterialCommunityIcons, MaterialIcons, Ionicons, Entypo, AntDesign, Feather, Octicons } from '@expo/vector-icons';
+import React from 'react';
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 
-const UsuarioInfo = () => {
-  const [ledStatus, setLedStatus] = useState(''); // Estado del LED
-  const [buttonText, setButtonText] = useState('Encender Led'); // Texto del botón
+const devicesData = [
+  { id: 1, type: 'Valvula GasRT', status: 'Activo' },
+  { id: 2, type: 'Sensor GasRT', status: 'Activo' },
+  { id: 3, type: 'Bascula GasRT', status: 'Inactiva', battery: '50%' },
+  // Agrega más dispositivos si es necesario
+];
 
-  // Función para enviar la solicitud HTTP al ESP32
-  const toggleLed = async () => {
-    try {
-      const response = await fetch('https://gasrt.000webhostapp.com/index.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'led_status=1', // Datos que deseas enviar al servidor PHP
-      });
+const DeviceListItem = ({ device, onPress }) => {
+  let statusInfo = device.status;
+  if (device.type === 'Sensor GasRT' || device.type === 'Valvula GasRT') {
+    statusInfo = device.status === 'Activo' ? 'Activo' : 'Inactivo';
+  } else if (device.type === 'Bascula GasRT') {
+    statusInfo = device.status === 'Inactiva' ? 'Inactiva' : 'Activa';
+  }
 
-      if (response.ok) {
-        const data = await response.text();
-        setLedStatus(data);
+  const batteryInfo = device.battery ? `Batería: ${device.battery}` : '';
 
-        // Cambiar el texto del botón según el estado del LED
-        if (data === '"led_status"="1"') {
-          setButtonText('Encender Led');
-        } else if (data === '"led_status"="0"') {
-          setButtonText('Apagar Led');
-        }
-      } else {
-        console.error('Error en la solicitud HTTP');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
+  // Mapea el tipo de dispositivo a su icono correspondiente
+  let iconSource;
+  switch (device.type) {
+    case 'Valvula GasRT':
+      iconSource = require('../Images/valvulaGas.png');
+      break;
+    case 'Sensor GasRT':
+      iconSource = require('../Images/gas.png');
+      break;
+    case 'Bascula GasRT':
+      iconSource = require('../Images/bascula.png');
+      break;
+    default:
+      iconSource = null;
+  }
 
-  useEffect(() => {
-    // Actualiza el texto del botón al cargar la página
-    if (ledStatus === 'LED_is_off') {
-      setButtonText('Encender Led');
-    } else if (ledStatus === 'LED_is_on') {
-      setButtonText('Apagar Led');
-    }
-  }, [ledStatus]);
+  const deviceItemStyle = [
+    styles.deviceItem,
+    device.status === 'Inactiva' && { backgroundColor: '#BEBEBE' }, // Cambio de fondo si el dispositivo está inactivo
+    device.status === 'Activo' && { backgroundColor: '#FF6B00' },
+    device.status === 'Conectado' && { backgroundColor: '#FF6B00' },
+  ];
 
   return (
-    <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      {/* Resto de tu código */}
-      <TouchableOpacity
-        style={{ marginTop: 50, backgroundColor: "#FF0000", padding: 30, borderRadius: 100,marginBottom:20}}
-        onPress={toggleLed} // Llama a la función cuando se presione el botón
-      >
-        <Text style={{ color: buttonText === 'Encender Led' ? "black" : "white", fontSize: 15, fontWeight: "700" }}>{buttonText}</Text>
-      </TouchableOpacity>
-      {/* Mostrar el estado del LED */}
-      <Text style={{ color: "black", fontSize: 15, fontWeight: "700" }}>
-        Estado del LED: {ledStatus}
-      </Text>
-    </SafeAreaView>
-  )
-}
+    <TouchableOpacity style={deviceItemStyle} onPress={onPress}>
+      {/* Renderiza el icono si está disponible */}
+      {iconSource && <Image source={iconSource} style={[styles.icon, { tintColor: 'white' }]} />}
+      <View style={styles.deviceInfo}>
+        <Text style={styles.deviceText}>{device.type}</Text>
+        <Text style={styles.deviceText}>ID: {device.id}</Text>
+      </View>
+      <Text style={styles.deviceText}>{statusInfo}</Text>
+      {batteryInfo ? <Text style={styles.deviceText}>{batteryInfo}</Text> : null}
+    </TouchableOpacity>
+  );
+};
+
+const UsuarioInfo = () => {
+  const navigation = useNavigation();
+
+  const handleDevicePress = (device) => {
+    // Navegar a la pantalla DispositivoInfo y pasar los datos del dispositivo como parámetros
+    navigation.navigate('DispositivosInfo', device);
+  };
+
+  return (
+    <View style={styles.container}>
+      <SafeAreaView style={styles.header}>
+        <Text style={styles.headertext}>Dispositivos</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("RegistroValvula")} style={styles.iconMasContainer}>
+          <Image source={require("../Images/more.png")} style={styles.iconoMas} />
+        </TouchableOpacity>
+      </SafeAreaView>
+      <FlatList style={{ marginTop: 20 }}
+        data={devicesData}
+        renderItem={({ item }) => <DeviceListItem device={item} onPress={() => handleDevicePress(item)} />}
+        keyExtractor={(item) => item.id.toString()}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10, // Modifica la altura del header aquí
+    paddingHorizontal: 25,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+  },
+  headertext: {
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  iconoMas: {
+    marginRight: 20,
+  },
+  deviceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    borderRadius: 15,
+    marginBottom: 10,
+    marginHorizontal: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.5,
+    shadowRadius: 5,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    elevation: 5,
+  },
+  icon: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+  deviceInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  deviceText: {
+    fontSize: 16,
+    color: 'white',
+    marginRight: 10,
+  },
+});
 
 export default UsuarioInfo;

@@ -15,14 +15,33 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "plugins": [
+        [
+          "@config-plugins/react-native-ble-plx",
+          {
+            "isBackgroundEnabled": true,
+            "modes": [
+              "peripheral",
+              "central"
+            ],
+            "bluetoothAlwaysPermission": "Allow $(PRODUCT_NAME) to connect to bluetooth devices"
+          }
+        ]
+      ],
+      "bundleIdentifier": "com.jvaldezc.GasRT"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.jvaldezc.GasRT"
+      "package": "com.jvaldezc.GasRT",
+      "permissions": [
+        "BLUETOOTH_SCAN",
+        "BLUETOOTH_CONNECT",
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
