@@ -44,7 +44,7 @@ const MenuConfig = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.profilepicture}>
-                <Image source={require("../Images/nobitches.png")} style={{ borderRadius: 150, width: 200, height: 200 }} />
+                <Image source={require("../Images/profile-picture.png")} style={{ borderRadius: 150, width: 200, height: 200 }} />
             </View>
             <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", borderRadius: 20, padding: 5, marginTop: 20 }}>
                 <Image style={{ marginRight: 10 }} source={require("../Images/Ellipse.png")} />
