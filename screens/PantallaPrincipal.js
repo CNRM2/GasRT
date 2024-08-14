@@ -4,9 +4,10 @@ import CircularProgress from 'react-native-circular-progress-indicator';
 import { useNavigation } from '@react-navigation/native';
 import { db } from '../components/config';
 import { getAuth } from "firebase/auth";
-import { ref, onValue, set, push } from 'firebase/database';
+import { ref, onValue, set } from 'firebase/database';
+import { axios } from 'axios';
 
-const PantallaPrincipal = () => {
+export default function PantallaPrincipal() {
   const [device1Data, setDevice1Data] = useState({
     Id_device: "",
     command: "on",
@@ -24,144 +25,126 @@ const PantallaPrincipal = () => {
     sensor_data: 0,
     state: "activo"
   });
-
+  
+ 
   const navigation = useNavigation();
   const auth = getAuth();
   const [user, setUser] = useState(null);
 
+  // Manejo de la autenticación
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
+    const unsubscribeAuth = auth.onAuthStateChanged(user => {
       if (user) {
         setUser(user);
-        cargarDatos(user.uid);
+        console.log('Usuario autenticado:', user.uid); // Verifica el usuario autenticado
       } else {
         setUser(null);
-        setDevice1Data({
-          Id_device: "",
-          command: "on",
-          led_status: false,
-          nombre: "",
-          sensor_data: 0,
-          state: "activo"
-        });
-        setDevice2Data({
-          Id_device: "",
-          command: "on",
-          led_status: false,
-          nombre: "",
-          sensor_data: 0,
-          state: "activo"
-        });
+        resetDeviceData(); // Resetear datos si no hay usuario
+        console.log('No hay usuario autenticado.'); // Verifica la ausencia de usuario
       }
     });
 
-    return () => unsubscribe();
-  }, []);
+    // Limpieza de la suscripción
+    return () => unsubscribeAuth();
+  }, [auth]);
 
-  const cargarDatos = (uid) => {
-    const deviceRef = ref(db, `users/${uid}/device`);
-    onValue(deviceRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        Object.keys(data).forEach((deviceId) => {
-          const deviceData = data[deviceId];
-          const id = deviceData.Id_device;
-          const command = deviceData.command || "on";
-          const led_status = deviceData.led_status || false;
-          const nombre = deviceData.nombre || "";
-          const sensor_data = deviceData.sensor_data || 0;
-          const state = deviceData.state || "activo";
-
-          if (deviceId === "-Ny1JGi_Cl-xzrP_fTMG") {
-            setDevice1Data({
-              Id_device: id,
-              command: command,
-              led_status: led_status,
-              nombre: nombre,
-              sensor_data: sensor_data < 0 ? 0 : sensor_data, // Verificar valor negativo
-              state: state
-            });
-          } 
-
-          if (deviceId === "-Ny1JX-I4AsZQU0nkvGc") {
-            setDevice2Data({
-              Id_device: id,
-              command: command,
-              led_status: led_status,
-              nombre: nombre,
-              sensor_data: sensor_data < 0 ? 0 : sensor_data, // Verificar valor negativo
-              state: state
-            });
-            console.log(deviceRef);
-          }
-        });
-      } else {
-        setDevice1Data({
-          Id_device: "",
-          command: "on",
-          led_status: false,
-          nombre: "",
-          sensor_data: 0,
-          state: "Activo"
-        });
-        setDevice2Data({
-          Id_device: "",
-          command: "on",
-          led_status: false,
-          nombre: "",
-          sensor_data: 0,
-          state: "Activo"
-        });
-      }
-    });
-  };
-
-  const toggleLed = async () => {
-    try {
-      const newLedStatus = !device1Data.led_status;
-      const command = newLedStatus ? 'on' : 'off';
-      await set(ref(db, `users/${user.uid}/device/command`), { command });
-
-      setDevice1Data({
-        ...device1Data,
-        led_status: newLedStatus
-      });
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-  const agregarDispositivo = async () => {
-    try {
-      const userDeviceRef = ref(db, `users/${user.uid}/device`);
-      const newDeviceRef = push(userDeviceRef);
-      const newDeviceId = newDeviceRef.key;
-  
-      await set(newDeviceRef, {
-        Id_device: newDeviceId,
-        command: "on",
-        led_status: false,
-        nombre: "Nuevo Dispositivo",
-        sensor_data: 0,
-        state: "activo"
-      });
-  
-      console.log("Nuevo dispositivo agregado con ID:", newDeviceId);
-    } catch (error) {
-      console.error('Error al agregar dispositivo:', error);
-    }
-  };
-  
-  
+  // Carga de datos en tiempo real
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (user) {
-        cargarDatos(user.uid);
-      }
-    }, 500);
+    if (user) {
+      const deviceRef = ref(db, `users/${user.uid}/device`);
+      const onDataChange = (snapshot) => {
+        const data = snapshot.val();
+        console.log('Datos recibidos:', data); // Verifica los datos recibidos
 
-    return () => clearInterval(interval);
+        if (data) {
+          let updatedDevice1 = { ...device1Data };
+          let updatedDevice2 = { ...device2Data };
+
+          Object.keys(data).forEach((deviceId) => {
+            const deviceData = data[deviceId];
+            const id = deviceData.Id_device;
+            const command = deviceData.command || "on";
+            const led_status = command === "on"; // El estado del LED depende del command
+            const nombre = deviceData.nombre || "";
+            const sensor_data = deviceData.sensor_data || 0;
+            const state = deviceData.state || "activo";
+
+            if (deviceId === "-Ny1JGi_Cl-xzrP_fTMG") {
+              updatedDevice1 = {
+                Id_device: id,
+                command: command,
+                led_status: led_status,
+                nombre: nombre,
+                sensor_data: sensor_data < 0 ? 0 : sensor_data,
+                state: state
+              }; 
+            } else if (deviceId === "-Ny1JX-I4AsZQU0nkvGc") {
+              updatedDevice2 = {
+                Id_device: id,
+                command: command,
+                led_status: led_status,
+                nombre: nombre,
+                sensor_data: sensor_data < 0 ? 0 : sensor_data,
+                state: state
+              };
+            }
+          });
+
+          setDevice1Data(updatedDevice1);
+          setDevice2Data(updatedDevice2);
+        } else {
+          resetDeviceData(); // Resetear datos si no hay información
+        }
+      };
+
+      // Suscribirse a los cambios en los datos
+      const subscription = onValue(deviceRef, onDataChange);
+
+      // Limpieza de la suscripción
+      return () => {
+        subscription(); // Cancelar suscripción
+      };
+    }
   }, [user]);
+
+  // Función para resetear los datos de los dispositivos
+  const resetDeviceData = () => {
+    setDevice1Data({
+      Id_device: "",
+      command: "on",
+      led_status: false,
+      nombre: "",
+      sensor_data: 0,
+      state: "activo"
+    });
+    setDevice2Data({
+      Id_device: "",
+      command: "on",
+      led_status: false,
+      nombre: "",
+      sensor_data: 0,
+      state: "activo"
+    });
+  };
+
+  // Función para alternar el estado del LED
+  const toggleLed = async () => {
+    if (user) {
+      try {
+        const newCommand = device1Data.command === 'on' ? 'off' : 'on';
+        await set(ref(db, `users/${user.uid}/device/${device1Data.Id_device}/command`), newCommand);
+        setDevice1Data(prevData => ({
+          ...prevData,
+          command: newCommand,
+          led_status: newCommand === 'on'
+        }));
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    } else {
+      console.error('No hay usuario autenticado.');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -170,7 +153,7 @@ const PantallaPrincipal = () => {
         <ScrollView horizontal={true} contentContainerStyle={styles.scrollViewContent}>
           <View style={styles.cardContainer}>
             <Text style={styles.cardTitle}>Nivel de Gas:</Text>
-            <CircularProgress value={device1Data.sensor_data} radius={90} valueSuffix='%' circleBackgroundColor='transparent' activeStrokeColor={device1Data.sensor_data > 1000 ? "red" : "green"} />
+            <CircularProgress value={device1Data.sensor_data} radius={90} valueSuffix='%' circleBackgroundColor='transparent' activeStrokeColor={device1Data.sensor_data > 10 ? "red" : "green"} />
             <TouchableOpacity onPress={() => navigation.navigate('ValvulaInfo')} style={styles.button}>
               <Image style={styles.buttonImage} source={require("../Images/Ellipse.png")} />
               <Text style={styles.buttonText}>{device1Data.nombre}</Text>
@@ -179,7 +162,7 @@ const PantallaPrincipal = () => {
           </View>
           <View style={styles.cardContainer}>
             <Text style={styles.cardTitle}>Gas Restante:</Text>
-            <CircularProgress value={device2Data.sensor_data} radius={90} valueSuffix='%' circleBackgroundColor='transparent' activeStrokeColor={device2Data.sensor_data > 1000 ? "red" : "green"} />
+            <CircularProgress value={device2Data.sensor_data} radius={90} valueSuffix='%' circleBackgroundColor='transparent' activeStrokeColor={device2Data.sensor_data > 10 ? "red" : "green"} />
             <TouchableOpacity onPress={() => navigation.navigate('ValvulaInfo')} style={[styles.button, styles.button2]}>
               <Image style={styles.buttonImage} source={require("../Images/Ellipse.png")} />
               <Text style={styles.buttonText}>{device2Data.nombre}</Text>
@@ -193,12 +176,12 @@ const PantallaPrincipal = () => {
           <Image source={require("../Images/despertador.png")} />
         </TouchableOpacity>
         <TouchableOpacity onPress={toggleLed} style={styles.actionButton}>
-          <Text style={styles.actionButtonText}>{device1Data.led_status ? "Cerrar" : "Abrir"} Válvula</Text>
+          <Text style={styles.actionButtonText}>{device1Data.command === "on" ? "Cerrar Válvula" : "Válvula Cerrada"}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -283,5 +266,3 @@ const styles = StyleSheet.create({
     fontWeight: "700"
   }
 });
-
-export default PantallaPrincipal;

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Alert, TextInput, View, StyleSheet, TouchableOpacity, Text,SafeAreaView,Image } from 'react-native';
+import { Alert, TextInput, View, StyleSheet, TouchableOpacity, Text, SafeAreaView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
-const InicioSesion = () => {
+export default function InicioSesion() {
     const navigation = useNavigation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -36,6 +36,7 @@ const InicioSesion = () => {
             .then((userCredential) => {
                 // Inicio de sesión exitoso
                 const user = userCredential.user;
+                registerIndieID('jvaldezc', 23057, 'M2YBwa6PvrlD1eMKESgXS7');
                 console.log(user);
                 Alert.alert('Éxito', 'Inicio de sesión exitoso.');
                 navigation.navigate('ButtonsTab');
@@ -50,44 +51,43 @@ const InicioSesion = () => {
     };
 
 
-    return (
-        <SafeAreaView style={styles.container}>
-            <View style={{ marginTop: 100 }}>
-                <Image source={require("../Images/GasLogo2.png")} />
-            </View>
+return (
+    <SafeAreaView style={styles.container}>
+        <View style={{ marginTop: 100 }}>
+            <Image source={require("../Images/GasLogo2.png")} />
+        </View>
 
-            <View style={{ justifyContent: "center", alignContent: "center", marginTop: 10 }}>
-                <SafeAreaView style={[styles.TextInputs]}>
-                    <TextInput
-                        value={email}
-                        onChangeText={setEmail}
-                        placeholder='CORREO O USUARIO'
-                        style={styles.inputStyle}
-                        keyboardType="email-address"
-                    />
-                </SafeAreaView>
-                <SafeAreaView style={[styles.TextInputs, { marginTop: 20 }]}>
-                    <TextInput
-                        value={password}
-                        onChangeText={setPassword}
-                        placeholder='CONTRASEÑA'
-                        secureTextEntry={true}
-                        style={styles.inputStyle}
-                    />
-                </SafeAreaView>
-            </View>
-            <TouchableOpacity style={[styles.ButtonCreate]} onPress={handleLogin}>
-                <Text style={{ fontSize: 16, fontWeight: "bold", color: "white" }}>INGRESAR</Text>
-            </TouchableOpacity>
-            <Text style={{ marginTop: 20 }}>¿No tienes una Cuenta?</Text>
-            <TouchableOpacity style={[styles.ButtonCreate]} onPress={() => navigation.navigate('RegistroUsuario')}>
-                <Text style={{ fontSize: 16, fontWeight: "bold", color: "white" }}>CREAR CUENTA</Text>
-            </TouchableOpacity>
-        </SafeAreaView>
-    );
+        <View style={{ justifyContent: "center", alignContent: "center", marginTop: 10 }}>
+            <SafeAreaView style={[styles.TextInputs]}>
+                <TextInput
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder='CORREO O USUARIO'
+                    style={styles.inputStyle}
+                    keyboardType="email-address"
+                />
+            </SafeAreaView>
+            <SafeAreaView style={[styles.TextInputs, { marginTop: 20 }]}>
+                <TextInput
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder='CONTRASEÑA'
+                    secureTextEntry={true}
+                    style={styles.inputStyle}
+                />
+            </SafeAreaView>
+        </View>
+        <TouchableOpacity style={[styles.ButtonCreate]} onPress={handleLogin}>
+            <Text style={{ fontSize: 16, fontWeight: "bold", color: "white" }}>INGRESAR</Text>
+        </TouchableOpacity>
+        <Text style={{ marginTop: 20 }}>¿No tienes una Cuenta?</Text>
+        <TouchableOpacity style={[styles.ButtonCreate]} onPress={() => navigation.navigate('RegistroUsuario')}>
+            <Text style={{ fontSize: 16, fontWeight: "bold", color: "white" }}>CREAR CUENTA</Text>
+        </TouchableOpacity>
+    </SafeAreaView>
+);
 };
 
-export default InicioSesion;
 
 const styles = StyleSheet.create({
     container: {
